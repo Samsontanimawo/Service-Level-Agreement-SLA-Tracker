@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SLA Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SLA Tracker</h1>
+      <p>Track your Service Level Agreements (SLA) and compare with actual uptime.</p>
+    </header>
+
+    <section class="sla-form-section">
+      <h2>Enter SLA Goal</h2>
+      <form id="sla-form">
+        <div class="form-group">
+          <label for="goal">SLA Goal (% Uptime)</label>
+          <input type="number" id="goal" placeholder="Enter SLA Goal (e.g., 99.9)" required />
+        </div>
+        <button type="submit" class="btn primary">Set SLA Goal</button>
+      </form>
+    </section>
+
+    <section class="tracker-section">
+      <h2>Track Uptime</h2>
+      <div class="btn-group">
+        <button id="start-btn" class="btn secondary">Start Tracker</button>
+        <button id="stop-btn" class="btn secondary" disabled>Stop Tracker</button>
+        <button id="reset-btn" class="btn secondary" disabled>Reset</button>
+      </div>
+      <p id="status" class="status">Status: Not Tracking</p>
+
+      <!-- Display Current Uptime Timer (HH:MM:SS) -->
+      <div class="timer">
+        <h3>Current Uptime: <span id="current-uptime">00:00:00</span></h3>
+      </div>
+    </section>
+
+    <section class="report-section">
+      <h2>Performance Report</h2>
+      <div id="report">
+        <p id="sla-report">SLA Goal: 0% Uptime</p>
+        <p id="uptime-report">Actual Uptime: 0%</p>
+        <p id="breach-report"></p>
+      </div>
+    </section>
+
+    <section class="chart-section">
+      <h2>Uptime Chart</h2>
+      <canvas id="uptime-chart"></canvas>
+    </section>
+
+    <section class="history-section">
+      <h2>Historical Uptime Tracking</h2>
+      <div class="history-controls">
+        <button id="last-24hrs" class="btn secondary">Last 24 Hours</button>
+        <button id="last-7days" class="btn secondary">Last 7 Days</button>
+        <button id="last-30days" class="btn secondary">Last 30 Days</button>
+        <button id="export-btn" class="btn primary">Export Data</button>
+      </div>
+      <div id="history-report">
+        <!-- History data will be shown here -->
+      </div>
+    </section>
+
+    <footer>
+      <p>&copy; 2025 SLA Tracker. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
