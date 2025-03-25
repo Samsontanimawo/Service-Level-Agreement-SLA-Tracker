@@ -3,39 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SLA Tracker</title>
+  <title>SLA Tracker</title> 
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>SLA Tracker</h1>
+      <h1><i class="fas fa-clock clock-icon"></i> SLA Tracker</h1>
       <p>Track your Service Level Agreements (SLA) and compare with actual uptime.</p>
     </header>
 
+    <!-- Rest of the code remains the same -->
     <section class="sla-form-section">
       <h2>Enter SLA Goal</h2>
       <form id="sla-form">
         <div class="form-group">
           <label for="goal">SLA Goal (% Uptime)</label>
-          <input type="number" id="goal" placeholder="Enter SLA Goal (e.g., 99.9)" required />
+          <input type="number" id="goal" placeholder="Enter SLA Goal (e.g., 9999)" required />
         </div>
         <button type="submit" class="btn primary">Set SLA Goal</button>
       </form>
     </section>
 
-    <section class="tracker-section">
-      <h2>Track Uptime</h2>
-      <div class="btn-group">
-        <button id="start-btn" class="btn secondary">Start Tracker</button>
-        <button id="stop-btn" class="btn secondary" disabled>Stop Tracker</button>
-        <button id="resume-btn" class="btn secondary" disabled>Resume</button>
-        <button id="reset-btn" class="btn secondary" disabled>Reset</button>
-        <button id="end-btn" class="btn secondary" disabled>End</button> <!-- End button added -->
-      </div>
-      <p id="status" class="status">Status: Not Tracking</p>
-    </section>
+<!-- ... existing code ... -->
+
+
+<section class="tracker-section">
+  <h2>Track Uptime</h2>
+  <div class="btn-group">
+    <button id="start-btn" class="btn secondary">Start Tracker</button>
+    <button id="stop-btn" class="btn secondary">Stop Tracker</button>
+    <button id="resume-btn" class="btn secondary">Resume</button>
+    <button id="end-btn" class="btn secondary">End</button>
+  </div>
+  <p id="status" class="status">Status: Not Tracking</p>
+</section>
+
+
+<!-- ... existing code ... -->
 
     <section class="report-section">
       <h2>Performance Report</h2>

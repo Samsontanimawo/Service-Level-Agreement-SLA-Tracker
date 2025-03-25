@@ -4,7 +4,7 @@ const goalInput = document.getElementById('goal');
 const startBtn = document.getElementById('start-btn');
 const stopBtn = document.getElementById('stop-btn');
 const resumeBtn = document.getElementById('resume-btn');
-const resetBtn = document.getElementById('reset-btn');
+const endBtn = document.getElementById('end-btn');
 const statusElem = document.getElementById('status');
 const slaReport = document.getElementById('sla-report');
 const uptimeReport = document.getElementById('uptime-report');
@@ -113,9 +113,10 @@ slaForm.addEventListener('submit', (e) => {
 });
 
 // Update the SLA goal displayed in the Performance Report
+// Update the SLA goal displayed in the Performance Report
 function updateSlaGoal(goal) {
   slaReport.textContent = `SLA Goal: ${goal}% Uptime`;  // Display the SLA goal dynamically
-  calculateUptime();  // Update uptime report
+  calculateUptime(); // Update uptime report
 }
 
 // Format time as HH:MM:SS
@@ -133,223 +134,7 @@ startBtn.addEventListener('click', () => {
     trackingInProgress = true;
     startBtn.disabled = true;
     stopBtn.disabled = false;
-    resetBtn.disabled = false;
-    resumeBtn.disabled = true; // Disable the Resume button while tracking
-    statusElem.textContent = 'Status: Tracking...';
-
-    // Start updating the uptime percentage and chart every second
-    interval = setInterval(() => {
-      elapsedTime = (Date.now() - trackingStartTime) / 1000; // In seconds
-
-      // Calculate SLA percentage (actual uptime)
-      const actualUptimePercentage = (elapsedTime / (elapsedTime + 1)) * 100; // Gradually increase uptime to 100%
-
-      // Update the chart with new data point
-      const newData = {
-        x: Date.now(), // Use current timestamp for the x-axis
-        y: actualUptimePercentage // Current uptime as y value (percentage)
-      };
-
-      uptimeData.push(newData);
-      uptimeChart.data.labels.push(newData.x); // Add timestamp to labels
-      uptimeChart.data.datasets[0].data.push(newData.y); // Add uptime percentage to data
-
-      // Update the chart in real time
-      updateChartColor(actualUptimePercentage);
-
-      // Update the current uptime display
-      const formattedUptime = formatTime(elapsedTime);
-      currentUptimeElem.textContent = formattedUptime; // Display the timer
-
-      // Update the Actual Uptime: field
-      uptimeReport.textContent = `Actual Uptime: ${actualUptimePercentage.toFixed(2)}%`; // Update the uptime percentage in real-time
-
-      // Add new uptime data to historical data and update display
-      const slaStatus = checkSlaStatus(actualUptimePercentage);
-      historicalData.push({
-        date: new Date().toLocaleString(),
-        uptime: actualUptimePercentage,
-        slaStatus: slaStatus
-      });
-      displayHistoricalData(); // Update historical data display in real time
-
-    }, 1000); // Update every 1 second
-  }
-});
-
-// Stop tracking uptime
-stopBtn.addEventListener('click', () => {
-  if (trackingInProgress) {
-    clearInterval(interval); // Stop the interval
-    const trackingEndTime = Date.now();
-    trackingInProgress = false;
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    resumeBtn.disabled = false; // Enable the Resume button after stopping the tracker
-
-    statusElem.textContent = `Status: Uptime Tracker Stopped. Total Uptime: ${elapsedTime.toFixed(2)} seconds.`;
-
-    uptimeData.push({
-      x: Date.now(),
-      y: (elapsedTime / (elapsedTime + 1)) * 100
-    });
-
-    // Save this session to historical data
-    const slaStatus = checkSlaStatus((elapsedTime / (elapsedTime + 1)) * 100);
-    historicalData.push({
-      date: new Date().toLocaleString(),
-      uptime: (elapsedTime / (elapsedTime + 1)) * 100,
-      slaStatus: slaStatus
-    });
-
-    saveHistoricalData(); // Save the updated historical data
-    uptimeChart.update();
-    calculateUptime();
-  }
-});
-
-// Export data as CSV
-exportBtn.addEventListener('click', () => {
-  const csvData = [
-    ["Timestamp", "Uptime (%)", "Duration (Seconds)", "SLA Status"], 
-    ...historicalData.map(item => [item.date, item.uptime.toFixed(2), item.duration, item.slaStatus])
-  ];
-
-  const csvContent = csvData.map(row => row.join(",")).join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "uptime_data.csv");
-    link.click();
-  }
-});
-
-// Resume tracking uptime
-resumeBtn.addEventListener('click', () => {
-  if (!trackingInProgress) {
-    trackingStartTime = Date.now() - elapsedTime * 1000; // Adjust start time to resume tracking
-    trackingInProgress = true;
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    resetBtn.disabled = false;
-    resumeBtn.disabled = true; // Disable the Resume button while tracking
-    statusElem.textContent = 'Status: Resuming Tracking...';
-
-    // Continue updating the uptime percentage and chart every second
-    interval = setInterval(() => {
-      elapsedTime = (Date.now() - trackingStartTime) / 1000; // In seconds
-
-      // Calculate SLA percentage (actual uptime)
-      const actualUptimePercentage = (elapsedTime / (elapsedTime + 1)) * 100; // Gradually increase uptime to 100%
-
-      // Update the chart with new data point
-      const newData = {
-        x: Date.now(), // Use current timestamp for the x-axis
-        y: actualUptimePercentage // Current uptime as y value (percentage)
-      };
-
-      uptimeData.push(newData);
-      uptimeChart.data.labels.push(newData.x); // Add timestamp to labels
-      uptimeChart.data.datasets[0].data.push(newData.y); // Add uptime percentage to data
-
-      // Update the chart in real time
-      updateChartColor(actualUptimePercentage);
-
-      // Update the current uptime display
-      const formattedUptime = formatTime(elapsedTime);
-      currentUptimeElem.textContent = formattedUptime; // Display the timer
-
-      // Update the Actual Uptime: field
-      uptimeReport.textContent = `Actual Uptime: ${actualUptimePercentage.toFixed(2)}%`; // Update the uptime percentage in real-time
-
-      // Add new uptime data to historical data and update display
-      const slaStatus = checkSlaStatus(actualUptimePercentage);
-      historicalData.push({
-        date: new Date().toLocaleString(),
-        uptime: actualUptimePercentage,
-        slaStatus: slaStatus
-      });
-      displayHistoricalData(); // Update historical data display in real time
-
-    }, 1000); // Update every 1 second
-  }
-});
-
-// Reset tracker
-resetBtn.addEventListener('click', () => {
-  clearInterval(interval); // Stop the interval
-  elapsedTime = 0;
-  slaGoal = 0; // Reset SLA Goal to 0
-  goalInput.value = ''; // Reset the input field for SLA Goal
-  statusElem.textContent = 'Status: Tracker Reset.';
-  uptimeData = [];
-  uptimeChart.data.labels = []; // Clear the chart's labels
-  uptimeChart.data.datasets[0].data = []; // Clear the chart's data
-  uptimeChart.data.datasets[0].borderColor = 'yellow'; // Set chart color to yellow when SLA Goal is not set
-  uptimeChart.update();
-  currentUptimeElem.textContent = '00:00:00'; // Reset the current uptime display
-  updateSlaGoal(0); // Reset SLA goal display to 0%
-  breachReport.textContent = ''; // Reset the SLA goal message
-  congratsMessage.textContent = ''; // Reset the Congrats message
-  congratsMessage.style.display = 'none'; // Hide the Congrats message
-  calculateUptime();
-});
-
-// Calculate uptime and check SLA breach
-// Calculate uptime and update actual uptime in real-time
-function calculateUptime() {
-  const actualUptimePercentage = (elapsedTime / (elapsedTime + 1)) * 100;
-  uptimeReport.textContent = `Actual Uptime: ${actualUptimePercentage.toFixed(2)}%`;
-  setTimeout(calculateUptime, 1000); // Update every 1 second
-}
-
-// Check if SLA goal is met or breached
-function checkSlaStatus(actualUptimePercentage) {
-  let slaStatus = '';
-  if (slaGoal === 0) {
-    uptimeChart.data.datasets[0].borderColor = 'yellow'; // Set chart to yellow if SLA Goal is not set
-    slaStatus = 'No SLA Goal Set';
-  } else if (actualUptimePercentage < slaGoal) {
-    breachReport.textContent = `🚨 SLA Breach: Uptime is below the goal!`;
-    uptimeChart.data.datasets[0].borderColor = 'red'; // Set chart to red for breach
-    slaStatus = 'SLA Breached';
-    congratsMessage.textContent = ''; // Hide the Congrats message if the SLA is breached
-    congratsMessage.style.display = 'none';
-  } else {
-    breachReport.textContent = `✅ SLA Goal Met: Uptime is at or above the goal!`;
-    uptimeChart.data.datasets[0].borderColor = 'green'; // Set chart to green for success
-    slaStatus = 'SLA Met';
-    congratsMessage.textContent = '🎉 Congratulations! SLA Goal Met! 🎉'; // Show Congrats message
-    congratsMessage.style.display = 'block'; // Show the Congrats message
-  }
-  uptimeChart.update();
-  return slaStatus;
-}
-
-// Update the chart color based on the SLA status
-function updateChartColor(actualUptimePercentage) {
-  if (slaGoal === 0) {
-    uptimeChart.data.datasets[0].borderColor = 'yellow'; // Set chart to yellow if SLA Goal is not set
-  } else if (actualUptimePercentage < slaGoal) {
-    uptimeChart.data.datasets[0].borderColor = 'red'; // Set chart to red if SLA is breached
-  } else {
-    uptimeChart.data.datasets[0].borderColor = 'green'; // Set chart to green if SLA is met
-  }
-  uptimeChart.update();
-}
-
-// Start tracking uptime
-startBtn.addEventListener('click', () => {
-  if (!trackingInProgress) {
-    trackingStartTime = Date.now();
-    trackingInProgress = true;
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    resetBtn.disabled = false;
-    resumeBtn.disabled = true; // Disable the Resume button while tracking
+    endBtn.disabled = false; 
     statusElem.textContent = 'Status: Tracking...';
 
     // Start updating the uptime percentage and chart every second
@@ -389,7 +174,146 @@ startBtn.addEventListener('click', () => {
       displayHistoricalData(); // Update historical data display in real-time
 
     }, 1000); // Update every 1 second
-
-    calculateUptime(); // Start updating actual uptime
   }
+});
+
+// Stop tracking uptime
+stopBtn.addEventListener('click', () => {
+  if (trackingInProgress) {
+    clearInterval(interval); // Stop the interval
+    trackingInProgress = false;
+    stopBtn.disabled = true;
+    resumeBtn.disabled = false; 
+    statusElem.textContent = 'Status: Paused';
+  }
+});
+
+// Resume tracking uptime
+resumeBtn.addEventListener('click', () => {
+  if (!trackingInProgress) {
+    trackingStartTime = Date.now() - elapsedTime * 1000; // Adjust start time to resume tracking
+    trackingInProgress = true;
+    resumeBtn.disabled = true; 
+    stopBtn.disabled = false; 
+    statusElem.textContent = 'Status: Resumed';
+
+    // Continue updating the uptime percentage and chart every second
+    interval = setInterval(() => {
+      elapsedTime = (Date.now() - trackingStartTime) / 1000; // In seconds
+
+      // Calculate SLA percentage (actual uptime)
+      const actualUptimePercentage = (elapsedTime / (elapsedTime + 1)) * 100; // Gradually increase uptime to 100%
+
+      // Update the chart with new data point
+      const newData = {
+        x: Date.now(), // Use current timestamp for the x-axis
+        y: actualUptimePercentage // Current uptime as y value (percentage)
+      };
+
+      uptimeData.push(newData);
+      uptimeChart.data.labels.push(newData.x); // Add timestamp to labels
+      uptimeChart.data.datasets[0].data.push(newData.y); // Add uptime percentage to data
+
+      // Update the chart in real-time
+      updateChartColor(actualUptimePercentage);
+
+      // Update the current uptime display
+      const formattedUptime = formatTime(elapsedTime);
+      currentUptimeElem.textContent = formattedUptime; // Display the timer
+
+      // Update the Actual Uptime field
+      uptimeReport.textContent = `Actual Uptime: ${actualUptimePercentage.toFixed(2)}%`; // Update the uptime percentage in real-time
+
+      // Add new uptime data to historical data and update display
+     // Add new uptime data to historical data and update display
+     const slaStatus = checkSlaStatus(actualUptimePercentage);
+     historicalData.push({
+       date: new Date().toLocaleString(),
+       uptime: actualUptimePercentage,
+       slaStatus: slaStatus
+     });
+     displayHistoricalData(); // Update historical data display in real-time
+
+   }, 1000); // Update every 1 second
+ }
+});
+
+// End tracking uptime
+endBtn.addEventListener('click', () => {
+ if (trackingInProgress) {
+   trackingInProgress = false;
+   clearInterval(interval);
+   stopBtn.disabled = true;
+   resumeBtn.disabled = true;
+   endBtn.disabled = true;
+   statusElem.textContent = 'Status: Ended';
+   updateChartColor(uptimeData[uptimeData.length - 1].y); 
+   const finalUptime = uptimeData[uptimeData.length - 1].y;
+   const slaStatus = checkSlaStatus(finalUptime);
+   historicalData.push({
+     date: new Date().toLocaleString(),
+     uptime: finalUptime,
+     slaStatus: slaStatus
+   });
+   displayHistoricalData(); 
+   saveHistoricalData(); 
+   startBtn.disabled = false; // Enable the Start button again
+ }
+});
+
+// Calculate uptime and check SLA breach
+function calculateUptime() {
+ const actualUptimePercentage = (elapsedTime / (elapsedTime + 1)) * 100;
+ uptimeReport.textContent = `Actual Uptime: ${actualUptimePercentage.toFixed(2)}%`;
+ setTimeout(calculateUptime, 1000); // Update every 1 second
+}
+
+// Check if SLA goal is met or breached
+function checkSlaStatus(actualUptimePercentage) {
+ let slaStatus = '';
+ if (slaGoal === 0) {
+   uptimeChart.data.datasets[0].borderColor = 'yellow'; // Set chart to yellow if SLA Goal is not set
+   slaStatus = 'No SLA Goal Set';
+ } else if (actualUptimePercentage < slaGoal) {
+   breachReport.textContent = `SLA Breach: Uptime is below the goal!`;
+   uptimeChart.data.datasets[0].borderColor = 'red'; // Set chart to red for breach
+   slaStatus = 'SLA Breached';
+ } else {
+   breachReport.textContent = `SLA Goal Met: Uptime is at or above the goal!`;
+   uptimeChart.data.datasets[0].borderColor = 'green'; // Set chart to green for success
+   slaStatus = 'SLA Met';
+ }
+ uptimeChart.update();
+ return slaStatus;
+}
+
+// Update the chart color based on the SLA status
+function updateChartColor(actualUptimePercentage) {
+ if (slaGoal === 0) {
+   uptimeChart.data.datasets[0].borderColor = 'yellow'; // Set chart to yellow if SLA Goal is not set
+ } else if (actualUptimePercentage < slaGoal) {
+   uptimeChart.data.datasets[0].borderColor = 'red'; // Set chart to red if SLA is breached
+ } else {
+   uptimeChart.data.datasets[0].borderColor = 'green'; // Set chart to green if SLA is met
+ }
+ uptimeChart.update();
+}
+
+// Export data as CSV
+exportBtn.addEventListener('click', () => {
+ const csvData = [
+   ["Timestamp", "Uptime (%)", "SLA Status"], 
+   ...historicalData.map(item => [item.date, item.uptime.toFixed(2), item.slaStatus])
+ ];
+
+ const csvContent = csvData.map(row => row.join(",")).join("\n");
+ const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+ const link = document.createElement("a");
+
+ if (link.download !== undefined) {
+   const url = URL.createObjectURL(blob);
+   link.setAttribute("href", url);
+   link.setAttribute("download", "uptime_data.csv");
+   link.click();
+ }
 });
